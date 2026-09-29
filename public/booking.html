@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Status Pesanan — Flash Sale</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <span class="brand">TIKET</span>
+      <a class="link" href="/event.html">Kembali ke event</a>
+    </header>
+
+    <div id="banner" class="banner" hidden></div>
+
+    <section class="panel" id="card" hidden>
+      <div class="muted">Pesanan</div>
+      <div class="ticket-title" id="booking-id">—</div>
+
+      <div class="row">
+        <span class="muted">Status</span>
+        <span class="value">
+          <span class="status"><span class="dot" id="dot"></span><span id="status">—</span></span>
+        </span>
+      </div>
+      <div class="row">
+        <span class="muted">Sisa waktu</span>
+        <span class="value" id="countdown">—</span>
+      </div>
+      <div class="row">
+        <span class="muted">Jumlah</span>
+        <span class="value" id="quantity">—</span>
+      </div>
+
+      <button id="pay" style="margin-top:16px">Simulasikan Pembayaran</button>
+    </section>
+
+    <section class="panel center" id="empty">
+      <p class="muted">Belum ada pesanan. Ambil tiketmu di halaman event.</p>
+      <a class="link" href="/event.html">Lihat event</a>
+    </section>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

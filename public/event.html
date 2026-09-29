@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Detail Event — Flash Sale</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <span class="brand">TIKET</span>
+      <a class="link" href="/booking.html">Pesanan saya</a>
+    </header>
+
+    <div id="banner" class="banner" hidden></div>
+
+    <section class="panel">
+      <div class="ticket-title" id="event-name">Memuat event…</div>
+      <div class="muted" id="event-meta">—</div>
+
+      <div class="row">
+        <span class="muted">Harga</span>
+        <span class="value" id="price">—</span>
+      </div>
+      <div class="row">
+        <span class="muted">Sisa kuota</span>
+        <span class="value"><strong id="quota">–</strong></span>
+      </div>
+
+      <div style="margin-top:16px">
+        <label for="quantity">Jumlah</label>
+        <select id="quantity">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+      </div>
+
+      <button id="book">Amankan Tiket</button>
+      <p class="muted center" style="margin-top:12px">Kuota diambil selama 10 menit.</p>
+    </section>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

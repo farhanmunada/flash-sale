@@ -14,7 +14,7 @@ declare module 'amqplib' {
   export interface Message {
     content: Buffer;
     fields: Record<string, unknown>;
-    properties: Record<string, unknown>;
+    properties: Record<string, unknown> & { headers?: Record<string, unknown> };
   }
 
   export interface ConsumeOptions {

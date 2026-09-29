@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flash Sale Tiket</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <span class="brand">TIKET</span>
+      <span class="quota">sisa <strong id="quota">–</strong></span>
+    </header>
+
+    <h1>Perebutan 100 tiket. Satu klik. Nol tiket ganda.</h1>
+
+    <div id="banner" class="banner" hidden></div>
+
+    <section class="panel">
+      <div id="auth-title" class="muted" style="margin-bottom:16px">Masuk ke akunmu</div>
+
+      <form id="auth-form">
+        <label for="email">Email</label>
+        <input id="email" type="email" autocomplete="email" required />
+
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" required />
+
+        <button id="submit" type="submit">Masuk</button>
+      </form>
+
+      <p class="center muted" style="margin-top:16px">
+        <span id="toggle-text">Belum punya akun?</span>
+        <button id="toggle" type="button" class="link">Daftar</button>
+      </p>
+    </section>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
