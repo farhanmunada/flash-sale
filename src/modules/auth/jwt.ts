@@ -52,10 +52,15 @@ export async function verifyToken(token: string): Promise<JwtPayload | null> {
   if (expected !== signature) return null;
 
   try {
-    const decoded = JSON.parse(base64UrlDecodeToString(payload)) as JwtPayload;
-    if (typeof decoded.sub !== 'number' || typeof decoded.exp !== 'number') return null;
+    const decoded = JSON.parse(base64UrlDecodeToString(payload)) as { sub?: unknown; exp?: unknown };
+    if (typeof decoded.exp !== 'number') return null;
     if (decoded.exp < Math.floor(Date.now() / 1000)) return null;
-    return decoded;
+
+    // `sub` may arrive as a numeric string (BIGINT coercion); normalize it.
+    const sub = typeof decoded.sub === 'string' ? Number(decoded.sub) : decoded.sub;
+    if (typeof sub !== 'number' || !Number.isInteger(sub)) return null;
+
+    return { sub, exp: decoded.exp };
   } catch {
     return null;
   }

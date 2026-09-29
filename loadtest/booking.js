@@ -22,9 +22,14 @@ const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000';
 const EVENT_ID = Number(__ENV.EVENT_ID || 1);
 const VUS = Number(__ENV.VUS || 2000);
 
+// 410 (sold out) and 429 (rate limited) are legitimate outcomes of a flash
+// sale, not failures. Mark them as expected so http_req_failed only counts
+// genuine errors.
+http.setResponseCallback(http.expectedStatuses(202, 410, 429));
+
 // Tokens are pre-provisioned before the run and read from a file (one per line).
 const tokens = new SharedArray('tokens', () => {
-  const raw = open('./loadtest/tokens.txt');
+  const raw = open('./tokens.txt');
   return raw.split('\n').map((line) => line.trim()).filter((line) => line.length > 0);
 });
 
@@ -63,7 +68,12 @@ export default function () {
   if (response.status === 202) accepted.add(1);
   else if (response.status === 410) soldOut.add(1);
   else if (response.status === 429) rateLimited.add(1);
-  else otherErrors.add(1);
+  else {
+    otherErrors.add(1, { status: String(response.status), error_code: String(response.error_code ?? '') });
+    if (__VU < 5) {
+      console.log(`UNEXPECTED status=${response.status} error=${response.error} body=${String(response.body).slice(0, 200)}`);
+    }
+  }
 
   check(response, {
     'status is expected': (r) => [202, 410, 429].includes(r.status),

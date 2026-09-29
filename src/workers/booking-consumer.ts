@@ -25,7 +25,7 @@ async function handleMessage(channel: Channel, message: Message | null): Promise
       userId: job.userId,
       eventId: job.eventId,
       quantity: job.quantity,
-      idempotencyKey: job.bookingId,
+      idempotencyKey: job.idempotencyKey,
       expiresAt: new Date(job.expiresAt),
     });
     channel.ack(message);

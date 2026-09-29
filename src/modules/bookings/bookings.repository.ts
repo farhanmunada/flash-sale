@@ -1,7 +1,33 @@
 /** Bookings data access layer (SQL only). */
 
 import { sql } from '../../infra/db/client.ts';
+import { toNumber } from '../../infra/db/coerce.ts';
+import type { BookingStatus } from '../../core/constants.ts';
 import type { BookingRow } from './bookings.types.ts';
+
+interface RawBookingRow {
+  readonly id: string;
+  readonly user_id: number | string;
+  readonly event_id: number | string;
+  readonly quantity: number | string;
+  readonly status: BookingStatus;
+  readonly idempotency_key: string;
+  readonly expires_at: string | Date;
+  readonly created_at: string | Date;
+}
+
+function normalize(row: RawBookingRow): BookingRow {
+  return {
+    id: row.id,
+    user_id: toNumber(row.user_id),
+    event_id: toNumber(row.event_id),
+    quantity: toNumber(row.quantity),
+    status: row.status,
+    idempotency_key: row.idempotency_key,
+    expires_at: new Date(row.expires_at).toISOString(),
+    created_at: new Date(row.created_at).toISOString(),
+  };
+}
 
 export interface InsertBookingParams {
   readonly id: string;
@@ -39,33 +65,33 @@ export async function insertBookingWithItem(params: InsertBookingParams): Promis
 }
 
 export async function findById(bookingId: string): Promise<BookingRow | null> {
-  const rows = await sql<BookingRow[]>`
+  const rows = await sql<RawBookingRow[]>`
     SELECT id, user_id, event_id, quantity, status, idempotency_key, expires_at, created_at
     FROM bookings
     WHERE id = ${bookingId}
     LIMIT 1
   `;
-  return rows[0] ?? null;
+  return rows[0] ? normalize(rows[0]) : null;
 }
 
 /** Transitions PENDING -> PAID. Returns the row if the transition happened. */
 export async function markPaid(bookingId: string): Promise<BookingRow | null> {
-  const rows = await sql<BookingRow[]>`
+  const rows = await sql<RawBookingRow[]>`
     UPDATE bookings SET status = 'PAID'
     WHERE id = ${bookingId} AND status = 'PENDING'
     RETURNING id, user_id, event_id, quantity, status, idempotency_key, expires_at, created_at
   `;
-  return rows[0] ?? null;
+  return rows[0] ? normalize(rows[0]) : null;
 }
 
 /** Transitions PENDING -> EXPIRED. Returns the row if the transition happened. */
 export async function markExpired(bookingId: string): Promise<BookingRow | null> {
-  const rows = await sql<BookingRow[]>`
+  const rows = await sql<RawBookingRow[]>`
     UPDATE bookings SET status = 'EXPIRED'
     WHERE id = ${bookingId} AND status = 'PENDING'
     RETURNING id, user_id, event_id, quantity, status, idempotency_key, expires_at, created_at
   `;
-  return rows[0] ?? null;
+  return rows[0] ? normalize(rows[0]) : null;
 }
 
 export async function existsById(bookingId: string): Promise<boolean> {
