@@ -6,12 +6,16 @@
 import { Router } from './core/http/router.ts';
 import { errorMiddleware } from './middleware/error.middleware.ts';
 import { registerAuthRoutes } from './modules/auth/auth.routes.ts';
+import { registerBookingRoutes } from './modules/bookings/bookings.routes.ts';
+import { registerEventRoutes } from './modules/events/events.routes.ts';
 import type { RequestContext } from './core/http/router.ts';
 
 function buildRouter(): Router {
   const router = new Router();
   router.add('GET', '/health', [], async () => Response.json({ status: 'ok' }));
   registerAuthRoutes(router);
+  registerEventRoutes(router);
+  registerBookingRoutes(router);
   return router;
 }
 
