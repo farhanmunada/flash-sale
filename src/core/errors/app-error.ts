@@ -24,7 +24,7 @@ export class ValidationError extends AppError {
 }
 
 export class UnauthorizedError extends AppError {
-  constructor(message = 'Autentikasi diperlukan', code = ERROR_CODE.UNAUTHORIZED) {
+  constructor(message = 'Autentikasi diperlukan', code: string = ERROR_CODE.UNAUTHORIZED) {
     super(HTTP_STATUS.UNAUTHORIZED, message, code);
   }
 }
