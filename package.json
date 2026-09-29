@@ -10,6 +10,8 @@
     "worker": "bun run src/workers/index.ts",
     "migrate": "bun run src/infra/db/migrate.ts",
     "seed": "bun run src/scripts/seed.ts",
+    "provision-tokens": "bun run src/scripts/provision-tokens.ts",
+    "verify-integrity": "bun run src/scripts/verify-integrity.ts",
     "typecheck": "bunx tsc --noEmit",
     "test": "bun test"
   },

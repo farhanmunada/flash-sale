@@ -19,6 +19,7 @@ logs/
 
 # Load test results
 loadtest/results/
+loadtest/tokens.txt
 *.k6.json
 
 # OS / Editor
