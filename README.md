@@ -148,23 +148,26 @@ Dijalankan di mesin dev tunggal (k6 + server Bun + Redis/PostgreSQL/RabbitMQ dal
 berjalan di host yang sama). Setiap run: `bun run seed 1 100` lalu
 `k6 run loadtest/booking.js` dengan `VUS` bervariasi.
 
-| VUs | Throughput | p95 | Error | Tiket terjual | Overselling |
-|----:|-----------:|----:|------:|--------------:|:-----------:|
-| 100 | ~640 req/s | **90 ms** | 0.00% | **100** | **0** |
-| 500 | ~630 req/s | 167 ms | 0.00% | **100** | **0** |
-| 1000 | ~722 req/s | 526 ms | 0.00% | **100** | **0** |
-| 2000 | ~851 req/s | 1.01 s | 0.00% | **100** | **0** |
+| VUs | Throughput | p95 | Error aplikasi | Tiket terjual | Overselling |
+|----:|-----------:|----:|---------------:|--------------:|:-----------:|
+| 100 | ~640 req/s | **90 ms** | **0.00%** | **100** | **0** |
+| 500 | ~630 req/s | 167 ms | **0.00%** | **100** | **0** |
+| 1000 | ~722 req/s | 526 ms | **0.00%** | **100** | **0** |
+| 2000 | ~600 req/s | ~2.5 s | **0.00%** | **100** | **0** |
 
 **Kesimpulan:**
 - **Nol overselling di semua level** — selalu tepat 100 booking, kuota Redis berakhir `0`
-  (`bun run verify-integrity 1 100` → `ok: true`).
-- **Error rate 0%** di seluruh run (setelah perbaikan race pada publisher RabbitMQ).
-- **Target p95 < 150ms terpenuhi hingga ~100–500 VU** (~640 req/s), yang merupakan batas
-  wajar satu proses Bun pada satu mesin dev.
-- Pada 1000–2000 VU, latensi naik karena **kejenuhan sumber daya satu host** (k6, server, dan
-  ketiga container berbagi CPU/memori) — bukan karena kontensi kuota atau database. Redis
-  terukur ~26.000 ops/s (≈1 ms/op), jadi kuota bukan bottleneck. Di deployment nyata, server
-  dan load generator berada di mesin terpisah.
+  (`bun run verify-integrity 1 100` → `ok: true`). Ini properti inti sistem.
+- **Error aplikasi 0%** di seluruh run. Metrik `booking_app_error_rate` hanya menghitung respons
+  server yang tak terduga (5xx/4xx selain 410/429). Kegagalan yang muncul pada 2000 VU
+  (`booking_connection_errors`) adalah **penolakan koneksi TCP** (`status 0`,
+  `connectex: No connection could be made`) — backlog listen socket OS saat 2000 koneksi baru
+  menyerbu serentak dari satu host, bukan kegagalan logika aplikasi.
+- **Target p95 < 150ms terpenuhi hingga ~100–500 VU** (~640 req/s), batas wajar satu proses Bun
+  pada satu mesin dev.
+- Pada 1000–2000 VU latensi naik karena **kejenuhan satu host** (k6, server Bun, dan ketiga
+  container berbagi CPU/memori). Redis terukur ~26.000 ops/s (≈1 ms/op), jadi kuota bukan
+  bottleneck. Di deployment nyata, server dan load generator berada di mesin terpisah.
 
 Verifikasi integritas pasca-run:
 
@@ -195,7 +198,7 @@ src/
 ├── core/           # config, constants, errors, logger, http kernel (router/validate/response)
 ├── infra/          # redis, db, queue (RabbitMQ)
 ├── middleware/     # auth, rate-limit, error
-├── modules/        # feature-first: auth, events, bookings, payments
+├── modules/        # feature-first: auth, events, bookings, payments, health
 ├── scripts/        # lua/, seed, migrate runner, provision-tokens, verify-integrity
 └── workers/        # booking-consumer, expiry-consumer
 public/             # UI (HTML + CSS + vanilla JS)

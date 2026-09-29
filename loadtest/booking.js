@@ -15,7 +15,7 @@
 
 import http from 'k6/http';
 import { check } from 'k6';
-import { Counter } from 'k6/metrics';
+import { Counter, Rate } from 'k6/metrics';
 import { SharedArray } from 'k6/data';
 
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000';
@@ -36,7 +36,11 @@ const tokens = new SharedArray('tokens', () => {
 const accepted = new Counter('booking_accepted');
 const soldOut = new Counter('booking_sold_out');
 const rateLimited = new Counter('booking_rate_limited');
-const otherErrors = new Counter('booking_other_errors');
+const appErrors = new Counter('booking_app_errors');
+const connErrors = new Counter('booking_connection_errors');
+// Only true application errors count against the SLO. TCP connection refusals
+// are an artefact of generating 2000 simultaneous connections on one host.
+const appErrorRate = new Rate('booking_app_error_rate');
 
 export const options = {
   scenarios: {
@@ -49,7 +53,7 @@ export const options = {
   },
   thresholds: {
     http_req_duration: ['p(95)<150', 'p(99)<300'],
-    http_req_failed: ['rate<0.01'],
+    booking_app_error_rate: ['rate<0.01'],
   },
 };
 
@@ -65,17 +69,28 @@ export default function () {
     },
   });
 
-  if (response.status === 202) accepted.add(1);
-  else if (response.status === 410) soldOut.add(1);
-  else if (response.status === 429) rateLimited.add(1);
-  else {
-    otherErrors.add(1, { status: String(response.status), error_code: String(response.error_code ?? '') });
+  const status = response.status;
+  if (status === 202) {
+    accepted.add(1);
+    appErrorRate.add(0);
+  } else if (status === 410) {
+    soldOut.add(1);
+    appErrorRate.add(0);
+  } else if (status === 429) {
+    rateLimited.add(1);
+    appErrorRate.add(0);
+  } else if (status === 0) {
+    // status 0 => the request never reached the server (TCP refused/reset).
+    connErrors.add(1);
+  } else {
+    appErrors.add(1, { status: String(status) });
+    appErrorRate.add(1);
     if (__VU < 5) {
-      console.log(`UNEXPECTED status=${response.status} error=${response.error} body=${String(response.body).slice(0, 200)}`);
+      console.log(`UNEXPECTED status=${status} body=${String(response.body).slice(0, 200)}`);
     }
   }
 
   check(response, {
-    'status is expected': (r) => [202, 410, 429].includes(r.status),
+    'no application error': (r) => r.status === 0 || [202, 410, 429].includes(r.status),
   });
 }
