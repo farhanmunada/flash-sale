@@ -10,11 +10,15 @@ import { registerAuthRoutes } from './modules/auth/auth.routes.ts';
 import { registerBookingRoutes } from './modules/bookings/bookings.routes.ts';
 import { registerEventRoutes } from './modules/events/events.routes.ts';
 import { registerPaymentRoutes } from './modules/payments/payments.routes.ts';
+import { checkHealth } from './modules/health/health.service.ts';
 import type { RequestContext } from './core/http/router.ts';
 
 function buildRouter(): Router {
   const router = new Router();
-  router.add('GET', '/health', [], async () => Response.json({ status: 'ok' }));
+  router.add('GET', '/health', [], async () => {
+    const report = await checkHealth();
+    return Response.json(report, { status: report.status === 'ok' ? 200 : 503 });
+  });
   registerAuthRoutes(router);
   registerEventRoutes(router);
   registerBookingRoutes(router);

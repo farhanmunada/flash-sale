@@ -4,7 +4,6 @@
  */
 
 import { queue } from '../../core/constants.ts';
-import { logger } from '../../core/logger.ts';
 import { ensureTopology } from './topology.ts';
 import type { Channel } from 'amqplib';
 
@@ -55,7 +54,6 @@ function publishTo(
 export async function publishSettle(job: BookingJob): Promise<void> {
   const channel = await getPublisherChannel();
   publishTo(channel, { exchange: queue.exchange, routingKey: queue.routing.settle }, job);
-  logger.debug('Published settle job', { bookingId: job.bookingId });
 }
 
 /** Publishes the delayed expiry job (dead-letters after TTL if unpaid). */
@@ -68,7 +66,6 @@ export async function publishExpiryDelay(job: BookingJob, ttlSeconds: number): P
     job,
     expirationMs,
   );
-  logger.debug('Published expiry delay job', { bookingId: job.bookingId, ttlSeconds });
 }
 
 export async function closePublisher(): Promise<void> {
