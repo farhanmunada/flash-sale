@@ -1,0 +1,31 @@
+# Secrets (Deny-First Security)
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+bun.lockb
+
+# Build artifacts
+dist/
+build/
+.next/
+out/
+
+# Logs
+*.log
+logs/
+
+# Load test results
+loadtest/results/
+*.k6.json
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Coverage
+coverage/
