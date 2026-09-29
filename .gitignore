@@ -30,3 +30,6 @@ Thumbs.db
 
 # Coverage
 coverage/
+
+# Agent spec (local-only, disinkronkan dari agentVault/00-System/AGENTS-TEMPLATE.md)
+AGENTS.md
