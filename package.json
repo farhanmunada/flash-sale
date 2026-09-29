@@ -1,0 +1,22 @@
+{
+  "name": "flashsale-system",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Flash sale ticket system: Redis atomic quota + async persistence via RabbitMQ",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts",
+    "worker": "bun run src/workers/index.ts",
+    "migrate": "bun run src/infra/db/migrate.ts",
+    "seed": "bun run src/scripts/seed.ts",
+    "typecheck": "bunx tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.7"
+  },
+  "devDependencies": {
+    "bun-types": "1.4.2"
+  }
+}
